@@ -1,19 +1,22 @@
 "use client"
 
-import React from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Menu } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
 
-import Logo from '@/components/logo';
+import Logo, { LogoMobile } from '@/components/logo';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { buttonVariants } from '@/components//ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 
 const Navbar = () => {
   return (
     <>
       <DesktopNavbar />
+      <MobileNavbar />
     </>
   )
 };
@@ -23,6 +26,45 @@ const Items = [
   { label: "Transactions", link: "/transactions" },
   { label: "Manage", link: "/manage" },
 ]
+
+const MobileNavbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="block border-separate bg-background md:hidden ">
+      <nav className='container flex items-center justify-between px-8'>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button variant={"ghost"} size={"icon"}>
+              <Menu />
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="w-[400px] sm:w-[540px]" side="left">
+            <SheetTitle>
+              <Logo />
+            </SheetTitle>
+            <div className="flex flex-col items-start gap-1 pt-4">
+              {Items.map((item) => (
+                <NavbarItem
+                  key={item.label}
+                  link={item.link}
+                  label={item.label}
+                  clickCallback={() => setIsOpen((prev) => !prev)}
+                />
+              ))}
+            </div>
+          </SheetContent>
+        </Sheet>
+        <div className="flex h-[80px] min-h-[60px] items-center gap-x-4">
+          <LogoMobile />
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeSwitcher />
+          <UserButton afterSignOutUrl='/sign-in' />
+        </div>
+      </nav>
+    </div>
+  )
+}
 
 const DesktopNavbar = () => {
   return (
@@ -49,9 +91,10 @@ const DesktopNavbar = () => {
   )
 }
 
-const NavbarItem = ({ link, label }: {
+const NavbarItem = ({ link, label, clickCallback }: {
   link: string;
   label: string;
+  clickCallback?: () => void;
 }) => {
   const pathname = usePathname()
   const isActive = pathname === link;
@@ -65,6 +108,9 @@ const NavbarItem = ({ link, label }: {
           "w-full justify-center text-lg text-muted-foreground hover:text-foreground",
           isActive && "text-foreground"
         )}
+        onClick={() => {
+          if (clickCallback) clickCallback();
+        }}
       >
         {label}
       </Link>
