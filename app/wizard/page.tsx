@@ -3,10 +3,11 @@ import { redirect } from 'next/navigation';
 import { currentUser } from '@clerk/nextjs/server';
 
 import { Separator } from '@/components/ui/separator';
-import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Logo from '@/components/logo';
+import { CurrencyComboBox } from '@/components/currencyComboBox';
 
 const WizardPage = async () => {
   const user = await currentUser();
@@ -33,6 +34,9 @@ const WizardPage = async () => {
             Set your default currency for transactions
           </CardDescription>
         </CardHeader>
+        <CardContent>
+          <CurrencyComboBox />
+        </CardContent>
       </Card>
       <Separator />
       <Button className='w-full' asChild>
