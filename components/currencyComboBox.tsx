@@ -17,6 +17,7 @@ import {
 import {
   Drawer,
   DrawerContent,
+  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
 import {
@@ -125,6 +126,7 @@ export function CurrencyComboBox() {
             {selectedOption ? <>{selectedOption.label}</> : <>+ Set currency</>}
           </Button>
         </DrawerTrigger>
+        <DrawerTitle className="hidden">DrawerTitle</DrawerTitle>
         <DrawerContent>
           <div className="mt-4 border-t">
             <OptionList setOpen={setOpen} setSelectedOption={selectOption} />
