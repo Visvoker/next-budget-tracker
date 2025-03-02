@@ -1,11 +1,12 @@
 "use client"
 
-import React, { ReactNode } from 'react'
+import React, { ReactNode, useCallback } from 'react'
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { TransactionType } from '@/lib/type';
 import { cn } from '@/lib/utils';
+import { TransactionType } from '@/lib/type';
+import { CreateTransactionSchema, CreateTransactionSchemaType } from '@/schema/transaction';
 
 import {
   Dialog,
@@ -14,10 +15,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
-
-import { CreateTransactionSchema, CreateTransactionSchemaType } from '@/schema/transaction';
 import { Input } from '@/components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel
+} from '@/components/ui/form';
+
 import CategoryPicker from './categoryPicker';
 
 interface createTransactionDialogProps {
@@ -34,8 +41,13 @@ const CreateTransactionDialog = ({
     defaultValues: {
       type,
       date: new Date(),
-    }
-  })
+    },
+  });
+
+  const handleCategoryChange = useCallback((value: string) => {
+    form.setValue("category", value)
+  }, [form]);
+
   return (
     <Dialog>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -84,16 +96,16 @@ const CreateTransactionDialog = ({
                 </FormItem>
               )}
             />
-
+            Transaction: {form.watch.name}
             <div className='flex items-center justify-between gap-2'>
               <FormField
                 control={form.control}
                 name="category"
-                render={({ field }) => (
+                render={({ }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <CategoryPicker type={type} />
+                    <FormLabel className='mr-2'>Category</FormLabel>
+                    <FormControl >
+                      <CategoryPicker type={type} onChange={handleCategoryChange} />
                     </FormControl>
                     <FormDescription>
                       Select a category for this transaction

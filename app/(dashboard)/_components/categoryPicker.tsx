@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import { useQuery } from '@tanstack/react-query';
 import { Category } from '@prisma/client';
@@ -9,17 +9,33 @@ import {
   PopoverTrigger
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { Command, CommandInput } from '@/components/ui/command';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from '@/components/ui/command';
 
-import CreateCategoryDialog from '@/app/(dashboard)/_components/createCategoryDialog';
+import CreateCategoryDialog from '../_components/createCategoryDialog';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface CategoryPickerProps {
   type: TransactionType;
+  onChange: (value: string) => void;
 }
 
-const CategoryPicker = ({ type }: CategoryPickerProps) => {
+const CategoryPicker = ({ type, onChange }: CategoryPickerProps) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
+
+  useEffect(() => {
+    if (!value) return;
+
+    onChange(value);
+  }, [onChange, value]);
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
@@ -30,6 +46,11 @@ const CategoryPicker = ({ type }: CategoryPickerProps) => {
   const selectedCategory = categoriesQuery.data?.find(
     (category: Category) => category.name === value
   );
+
+  const successCallback = useCallback((category: Category) => {
+    setValue(category.name);
+    setOpen((prev) => !prev);
+  }, [setValue, setOpen]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -45,6 +66,7 @@ const CategoryPicker = ({ type }: CategoryPickerProps) => {
           ) : (
             "Select category"
           )}
+          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
@@ -54,7 +76,34 @@ const CategoryPicker = ({ type }: CategoryPickerProps) => {
           }}
         >
           <CommandInput placeholder="Search category..." />
-          <CreateCategoryDialog type={type} />
+          <CreateCategoryDialog type={type} successCallback={successCallback} />
+          <CommandList>
+            <CommandEmpty>
+              <p>Category not found</p>
+              <p className='text-xs text-muted-foreground'>
+                Tip: Create a new category
+              </p>
+            </CommandEmpty>
+            <CommandGroup>
+              {categoriesQuery.data && categoriesQuery.data.map((category: Category) => (
+                <CommandItem
+                  key={category.name}
+                  onSelect={() => {
+                    setValue(category.name);
+                    setOpen((prev) => !prev)
+                  }}
+                >
+                  <CategoryRow category={category} />
+                  <Check
+                    className={cn(
+                      "mr-2 w-4 h-4 opacity-0",
+                      value === category.name && "opacity-100"
+                    )}
+                  />
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>

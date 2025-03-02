@@ -1,11 +1,16 @@
 "use client"
 
-import React, { useState } from 'react'
+import { toast } from 'sonner';
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
 import { useForm } from 'react-hook-form';
-import { CircleOff, PlusSquare } from 'lucide-react';
+import React, { useCallback, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod';
+import { CircleOff, Loader2, PlusSquare } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { cn } from '@/lib/utils';
+import { Category } from '@prisma/client';
 import { TransactionType } from '@/lib/type';
 import { CreateCategorySchema, CreateCategorySchemaType } from '@/schema/categories';
 
@@ -35,15 +40,17 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-import data from '@emoji-mart/data'
-import Picker from '@emoji-mart/react'
+import { CreateCategory } from '../_actions/categories';
+import { useTheme } from 'next-themes';
 
 interface CreateCategoryDialogProps {
   type: TransactionType;
+  successCallback: (category: Category) => void;
 }
 
 const CreateCategoryDialog = ({
-  type
+  type,
+  successCallback
 }: CreateCategoryDialogProps) => {
   const [open, setOpen] = useState(false);
   const form = useForm<CreateCategorySchemaType>({
@@ -53,6 +60,43 @@ const CreateCategoryDialog = ({
     },
   });
 
+  const queryClient = useQueryClient();
+  const theme = useTheme();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: CreateCategory,
+    onSuccess: async (data: Category) => {
+      form.reset({
+        name: "",
+        icon: "",
+        type,
+      });
+
+      toast.success(`Category ${data.name} created successfully 🎉`, {
+        id: "create-category"
+      });
+
+      successCallback(data);
+
+      await queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      });
+
+      setOpen((prev) => !prev);
+    },
+    onError: () => {
+      toast.error("Something went wrong", {
+        id: "create-category",
+      });
+    },
+  });
+
+  const onSubmit = useCallback((values: CreateCategorySchemaType) => {
+    toast.loading("Creating category...", {
+      id: "create-category"
+    });
+    mutate(values);
+  }, [mutate]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -82,7 +126,7 @@ const CreateCategoryDialog = ({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form className='space-y-8'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
             <FormField
               control={form.control}
               name="name"
@@ -90,10 +134,10 @@ const CreateCategoryDialog = ({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} />
+                    <Input placeholder="Category" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Select a category for this transaction
+                    This is how your category will appear in the app
                   </FormDescription>
                 </FormItem>
               )}
@@ -135,6 +179,7 @@ const CreateCategoryDialog = ({
                       <PopoverContent className='w-full'>
                         <Picker
                           data={data}
+                          theme={theme.resolvedTheme}
                           onEmojiSelect={(emoji: { native: string }) => {
                             field.onChange(emoji.native)
                           }}
@@ -160,7 +205,15 @@ const CreateCategoryDialog = ({
               Cancel
             </Button>
           </DialogClose>
-          <Button>Save</Button>
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            disabled={isPending}
+          >
+            {isPending
+              ? (<Loader2 className='animate-spin' />)
+              : ("Create")
+            }
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
