@@ -11,6 +11,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Command, CommandInput } from '@/components/ui/command';
 
+import CreateCategoryDialog from '@/app/(dashboard)/_components/createCategoryDialog';
+
 interface CategoryPickerProps {
   type: TransactionType;
 }
