@@ -53,7 +53,7 @@ const CreateTransactionDialog = ({
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form>
+          <form className='space-y-4'>
             <FormField
               control={form.control}
               name="description"
@@ -69,10 +69,6 @@ const CreateTransactionDialog = ({
                 </FormItem>
               )}
             />
-          </form>
-        </Form>
-        <Form {...form}>
-          <form>
             <FormField
               control={form.control}
               name="amount"
@@ -88,25 +84,24 @@ const CreateTransactionDialog = ({
                 </FormItem>
               )}
             />
-          </form>
-        </Form>
-        <Form {...form}>
-          <form>
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <FormControl>
-                    <CategoryPicker />
-                  </FormControl>
-                  <FormDescription>
-                    Select a category for this transaction
-                  </FormDescription>
-                </FormItem>
-              )}
-            />
+
+            <div className='flex items-center justify-between gap-2'>
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <CategoryPicker type={type} />
+                    </FormControl>
+                    <FormDescription>
+                      Select a category for this transaction
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+            </div>
           </form>
         </Form>
       </DialogContent>
