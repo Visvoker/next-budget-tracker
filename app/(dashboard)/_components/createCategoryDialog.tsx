@@ -195,7 +195,7 @@ const CreateCategoryDialog = ({
             />
           </form>
         </Form>
-        <DialogFooter>
+        <DialogFooter className=''>
           <DialogClose asChild>
             <Button
               type="button"
