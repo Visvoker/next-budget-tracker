@@ -7,6 +7,7 @@ import { currentUser } from '@clerk/nextjs/server';
 import CreateTransactionDialog from '@/app/(dashboard)/_components/createTransactionDialog';
 
 import { Button } from '@/components/ui/button';
+import Overview from './_components/overview';
 
 
 const dashboardPage = async () => {
@@ -60,6 +61,7 @@ const dashboardPage = async () => {
           </div>
         </div>
       </div>
+      <Overview userSettings={userSettings} />
     </div>
   )
 }
