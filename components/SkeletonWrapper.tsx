@@ -19,7 +19,7 @@ const SkeletonWrapper = ({
   if (!isLoading) return children;
 
   return (
-    <Skeleton className={cn(fullWidth && "w-full")}>
+    <Skeleton className={cn("w-full h-full", fullWidth && "w-full")}>
       <div className='opacity-0'>
         {children}
       </div>
