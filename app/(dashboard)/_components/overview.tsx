@@ -7,12 +7,13 @@ import { UserSettings } from '@prisma/client';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 import { MAX_DATE_RANGE_DAYS } from '@/lib/constants';
 import { toast } from 'sonner';
+import StatsCards from './statsCards';
 
 interface OverviewProps {
-  userSetting: UserSettings;
+  userSettings: UserSettings;
 }
 
-const Overview = ({ userSetting }: OverviewProps) => {
+const Overview = ({ userSettings }: OverviewProps) => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
     from: startOfMonth(new Date()),
     to: new Date(),
@@ -40,6 +41,13 @@ const Overview = ({ userSetting }: OverviewProps) => {
             }}
           />
         </div>
+      </div>
+      <div className='container flex flex-col w-full gap-2'>
+        <StatsCards
+          userSettings={userSettings}
+          from={dateRange.from}
+          to={dateRange.to}
+        />
       </div>
     </>
   )
