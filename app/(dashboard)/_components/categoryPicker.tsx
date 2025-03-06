@@ -1,8 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react'
 
-import { useQuery } from '@tanstack/react-query';
 import { Category } from '@prisma/client';
+import { useQuery } from '@tanstack/react-query';
+import { Check, ChevronsUpDown } from 'lucide-react';
+
+import { cn } from '@/lib/utils';
 import { TransactionType } from '@/lib/type';
+
 import {
   Popover,
   PopoverContent,
@@ -19,8 +23,6 @@ import {
 } from '@/components/ui/command';
 
 import CreateCategoryDialog from '../_components/createCategoryDialog';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface CategoryPickerProps {
   type: TransactionType;
@@ -39,8 +41,15 @@ const CategoryPicker = ({ type, onChange }: CategoryPickerProps) => {
 
   const categoriesQuery = useQuery({
     queryKey: ["categories", type],
-    queryFn: () =>
-      fetch(`/api/categories?type=${type}`).then((res) => res.json()),
+    queryFn: async () => {
+      const res = await fetch(`/api/categories?type=${type}`);
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      }
+
+      return res.json();
+    }
   });
 
   const selectedCategory = categoriesQuery.data?.find(
