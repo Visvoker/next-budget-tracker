@@ -1,12 +1,13 @@
 import React from 'react'
 import { redirect } from 'next/navigation';
-
-import { prisma } from '@/lib/prisma';
 import { currentUser } from '@clerk/nextjs/server';
 
+import { prisma } from '@/lib/prisma';
 import CreateTransactionDialog from '@/app/(dashboard)/_components/createTransactionDialog';
 
 import { Button } from '@/components/ui/button';
+
+import History from './_components/history';
 import Overview from './_components/overview';
 
 
@@ -62,6 +63,7 @@ const dashboardPage = async () => {
         </div>
       </div>
       <Overview userSettings={userSettings} />
+      <History userSettings={userSettings}/>
     </div>
   )
 }
