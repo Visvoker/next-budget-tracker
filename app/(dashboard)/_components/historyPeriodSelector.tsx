@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Period, TimeFrame } from '@/lib/type'
+import { Period, Timeframe } from '@/lib/type'
 import { useQuery } from '@tanstack/react-query';
 
 import { GetHistoryPeriodsResponseType } from '@/app/api/history-periods/route';
@@ -12,15 +12,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface HistoryPeriodSelectorProps {
   period: Period;
   setPeriod: (period: Period) => void;
-  timeframe: TimeFrame;
-  setTimeFrame: (timeframe: TimeFrame) => void;
+  timeframe: Timeframe;
+  setTimeframe: (timeframe: Timeframe) => void;
 }
 
 const HistoryPeriodSelector = ({
   period,
   setPeriod,
   timeframe,
-  setTimeFrame,
+  setTimeframe,
 }: HistoryPeriodSelectorProps) => {
   const historyPeriods = useQuery<GetHistoryPeriodsResponseType>({
     queryKey: ["overview", "history", "periods"],
@@ -38,7 +38,7 @@ const HistoryPeriodSelector = ({
     <div className='flex flex-wrap items-center gap-4'>
       <Tabs
         value={timeframe}
-        onValueChange={(value) => setTimeFrame(value as TimeFrame)}
+        onValueChange={(value) => setTimeframe(value as Timeframe)}
       >
         <SkeletonWrapper isLoading={historyPeriods.isFetching} >
           <TabsList>
@@ -107,10 +107,15 @@ const YearSelector = ({
   )
 }
 
+interface MonthSelectorProps {
+  period: Period,
+  setPeriod: (period: Period) => void,
+}
+
 const MonthSelector = ({
   period,
   setPeriod,
-}: YearSelectorProps) => {
+}: MonthSelectorProps) => {
   return (
     <Select
       value={period.month.toString()}

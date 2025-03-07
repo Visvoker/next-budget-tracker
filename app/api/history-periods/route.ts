@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request): Promise<Response> {
+export async function GET(): Promise<Response> {
   const user = await currentUser();
   if (!user) {
     return NextResponse.redirect("/sign-in");

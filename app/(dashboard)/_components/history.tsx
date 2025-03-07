@@ -1,25 +1,37 @@
 "use client"
 
+import { useQuery } from '@tanstack/react-query'
 import React, { useMemo, useState } from 'react'
+import HistoryPeriodSelector from './historyPeriodSelector'
 
 import { UserSettings } from '@prisma/client'
-import { Period, TimeFrame } from '@/lib/type'
+import { Period, Timeframe } from '@/lib/type'
 import { GetFormatterForCurrency } from '@/lib/helper'
 
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import HistoryPeriodSelector from './historyPeriodSelector'
+import SkeletonWrapper from '@/components/SkeletonWrapper'
+
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from 'recharts';
 
 interface HistoryProps {
   userSettings: UserSettings
 }
 
 const History = ({ userSettings }: HistoryProps) => {
-  const [timeframe, setTimeframe] = useState<TimeFrame>("month");
+  const [timeframe, setTimeframe] = useState<Timeframe>("month");
   const [period, setPeriod] = useState<Period>({
     month: new Date().getMonth(),
     year: new Date().getFullYear(),
@@ -28,6 +40,22 @@ const History = ({ userSettings }: HistoryProps) => {
   const formatter = useMemo(() => {
     return GetFormatterForCurrency(userSettings.currency)
   }, [userSettings.currency])
+
+  const historyDataQuery = useQuery({
+    queryKey: ["overview", "history", timeframe, period],
+    queryFn: async () => {
+      const res = await fetch(`/api/history-data?timeframe=${timeframe}&year=${period.year}&month=${period.month}`)
+
+      if (!res.ok) {
+        throw new Error(`API Error: ${res.status} ${res.statusText}`);
+      }
+      return res.json();
+    }
+  });
+
+  const dataAvailable = historyDataQuery.data && historyDataQuery.data.length > 0;
+
+  // console.log(dataAvailable)
 
   return (
     <div className='container'>
@@ -39,7 +67,7 @@ const History = ({ userSettings }: HistoryProps) => {
               period={period}
               setPeriod={setPeriod}
               timeframe={timeframe}
-              setTimeFrame={setTimeframe}
+              setTimeframe={setTimeframe}
             />
 
             <div className='flex h-10 gap-2'>
@@ -54,6 +82,98 @@ const History = ({ userSettings }: HistoryProps) => {
             </div>
           </CardTitle>
         </CardHeader>
+        <CardContent>
+          <SkeletonWrapper isLoading={historyDataQuery.isFetching}>
+            {dataAvailable && (
+              <ResponsiveContainer width={"100%"} height={300}>
+                <BarChart
+                  height={300}
+                  data={historyDataQuery.data}
+                  barCategoryGap={5}
+                >
+                  <defs>
+                    <linearGradient id="incomeBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset={"0"}
+                        stopColor='#10b981'
+                        stopOpacity={"1"}
+                      />
+                      <stop
+                        offset={"1"}
+                        stopColor='#10b981'
+                        stopOpacity={"0"}
+                      />
+                    </linearGradient>
+                    <linearGradient id="expenseBar" x1="0" y1="0" x2="0" y2="1">
+                      <stop
+                        offset={"0"}
+                        stopColor='#ef4444'
+                        stopOpacity={"1"}
+                      />
+                      <stop
+                        offset={"1"}
+                        stopColor='#ef4444'
+                        stopOpacity={"0"}
+                      />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid
+                    strokeDasharray='5 5'
+                    strokeOpacity={"0.2"}
+                    vertical={false}
+                  />
+                  <XAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    padding={{ left: 5, right: 5 }}
+                    dataKey={(data) => {
+                      const { year, month, day } = data;
+                      const date = new Date(year, month, day || 1);
+                      if (timeframe === "year") {
+                        return date.toLocaleDateString("default", {
+                          month: "long"
+                        });
+                      }
+                      return date.toLocaleDateString("default", {
+                        day: "2-digit",
+                      });
+                    }}
+                  />
+                  <YAxis
+                    stroke="#888888"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Bar
+                    dataKey={"income"}
+                    label="Income"
+                    fill="url(#incomeBar)"
+                    radius={4}
+                    className='cursor-pointer'
+                  />
+                  <Bar
+                    dataKey={"expense"}
+                    label="Expense"
+                    fill="url(#expenseBar)"
+                    radius={4}
+                    className='cursor-pointer'
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+            {!dataAvailable && (
+              <Card className='flex flex-col h-[300px] items-center justify-center bg-background'>
+                No data for the selected period
+                <p className='text-sm text-muted-foreground'>
+                  Try selecting a different period or adding new transactions
+                </p>
+              </Card>
+            )}
+          </SkeletonWrapper>
+        </CardContent>
       </Card>
     </div>
   )
