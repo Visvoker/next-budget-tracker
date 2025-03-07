@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery } from '@tanstack/react-query'
-import React, { useMemo, useState } from 'react'
+import React, { useCallback, useMemo, useState } from 'react'
 import HistoryPeriodSelector from './historyPeriodSelector'
 
 import { UserSettings } from '@prisma/client'
@@ -24,7 +24,10 @@ import {
   ResponsiveContainer,
   XAxis,
   YAxis,
+  Tooltip,
 } from 'recharts';
+import { cn } from '@/lib/utils'
+import CountUp from 'react-countup'
 
 interface HistoryProps {
   userSettings: UserSettings
@@ -161,6 +164,12 @@ const History = ({ userSettings }: HistoryProps) => {
                     radius={4}
                     className='cursor-pointer'
                   />
+                  <Tooltip
+                    cursor={{ opacity: 0.2 }}
+                    content={props => (
+                      <CustomTooltip formatter={formatter} {...props} />
+                    )}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -180,3 +189,79 @@ const History = ({ userSettings }: HistoryProps) => {
 }
 
 export default History
+
+const CustomTooltip = ({
+  active,
+  payload,
+  formatter,
+}: any) => {
+  if (!active || !payload || payload.length === 0) return null;
+
+  const data = payload[0].payload;
+  const { expense, income } = data;
+
+  return (
+    <div className='min-w-[300px] rounded border-white bg-background p-4'>
+      <TooltipRow
+        formatter={formatter}
+        label='Expense'
+        value={expense}
+        bgColor='bg-red-500'
+        textColor='text-red-500'
+      />
+      <TooltipRow
+        formatter={formatter}
+        label='Income'
+        value={income}
+        bgColor='bg-emerald-500'
+        textColor='text-emerald-500'
+      />
+      <TooltipRow
+        formatter={formatter}
+        label='Expense'
+        value={income - expense}
+        bgColor='bg-gray-100'
+        textColor='text-foreground'
+      />
+    </div>
+  )
+}
+
+interface TooltipRowProps {
+  label: string,
+  value: number,
+  bgColor: string,
+  textColor: string,
+  formatter: Intl.NumberFormat,
+}
+
+const TooltipRow = ({
+  label,
+  value,
+  bgColor,
+  textColor,
+  formatter,
+}: TooltipRowProps) => {
+  const formattingFn = useCallback((value: number) => {
+    return formatter.format(value)
+  }, [formatter])
+
+  return (
+    <div className='flex items-center gap-2 '>
+      <div className={cn("h-4 w-4 rounded-full", bgColor)}></div>
+      <div className='flex w-full justify-between'>
+        <p className='text-sm text-muted-foreground'>{label}</p>
+        <div className={cn("text-sm font-bold", textColor)}>
+          <CountUp
+            duration={0.5}
+            preserveValue
+            end={value}
+            decimals={0}
+            formattingFn={formattingFn}
+            className='text-sm'
+          />
+        </div>
+      </div>
+    </div>
+  )
+}

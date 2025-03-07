@@ -48,14 +48,14 @@ export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
         day_month_year_userId: {
           userId: user.id,
           day: date.getUTCDate(),
-          month: date.getUTCMonth() + 1,
+          month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
         },
       },
       create: {
         userId: user.id,
         day: date.getUTCDate(),
-        month: date.getUTCMonth() + 1,
+        month: date.getUTCMonth(),
         year: date.getUTCFullYear(),
         expense: type === "expense" ? amount : 0,
         income: type === "income" ? amount : 0,
@@ -75,13 +75,13 @@ export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
       where: {
         month_year_userId: {
           userId: user.id,
-          month: date.getUTCMonth() + 1,
+          month: date.getUTCMonth(),
           year: date.getUTCFullYear(),
         },
       },
       create: {
         userId: user.id,
-        month: date.getUTCMonth() + 1,
+        month: date.getUTCMonth(),
         year: date.getUTCFullYear(),
         expense: type === "expense" ? amount : 0,
         income: type === "income" ? amount : 0,
