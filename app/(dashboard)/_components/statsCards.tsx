@@ -32,7 +32,7 @@ const StatsCards = ({
       );
 
       if (!res.ok) {
-        return new Error(`API Error:${res.status} ${res.statusText}`)
+        throw new Error(`API Error:${res.status} ${res.statusText}`)
       }
 
       return res.json();
