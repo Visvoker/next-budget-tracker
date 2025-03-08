@@ -6,7 +6,7 @@ import { currentUser } from "@clerk/nextjs/server";
 
 import { CreateTransactionSchema, CreateTransactionSchemaType } from "@/schema/transaction"
 
-export const CreateTransaction = async (form: CreateTransactionSchemaType) => {
+export async function CreateTransaction(form: CreateTransactionSchemaType) {
   const parsedBody = CreateTransactionSchema.safeParse(form);
   if (!parsedBody.success) {
     throw new Error(parsedBody.error.message);
