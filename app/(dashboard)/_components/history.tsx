@@ -58,8 +58,6 @@ const History = ({ userSettings }: HistoryProps) => {
 
   const dataAvailable = historyDataQuery.data && historyDataQuery.data.length > 0;
 
-  // console.log(dataAvailable)
-
   return (
     <div className='container'>
       <h2 className="mt-12 text-3xl font-bold">History</h2>

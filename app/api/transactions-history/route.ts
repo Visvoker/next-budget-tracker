@@ -27,10 +27,10 @@ export async function GET(request: Request): Promise<Response> {
   const transaction = await getTransactionHistory(
     user.id,
     queryParams.data.from,
-    queryParams.data.from,
+    queryParams.data.to,
   )
 
-  return NextResponse.json(transaction);
+  return NextResponse.json(transaction, { status: 200 });
 }
 
 export type getTransactionHistoryResponseType = Awaited<

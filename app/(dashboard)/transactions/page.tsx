@@ -7,7 +7,7 @@ import { differenceInDays, startOfMonth } from 'date-fns';
 import { DateRangePicker } from '@/components/ui/date-range-picker';
 
 import { MAX_DATE_RANGE_DAYS } from '@/lib/constants';
-import TransactionTable from './_components/TransactionTable';
+import TransactionTable from './_components/transactionTable';
 
 const TransactionsPage = () => {
   const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
