@@ -1,12 +1,16 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
+import { cn } from '@/lib/utils'
 import { DateToUTCDate } from '@/lib/helper'
 import { useQuery } from '@tanstack/react-query'
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
@@ -20,11 +24,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Button } from '@/components/ui/button'
 import SkeletonWrapper from '@/components/SkeletonWrapper'
 
-import { getTransactionHistoryResponseType } from '@/app/api/transactions-history/route'
+import { DataTableViewOptions } from '@/components/datatable/columnToggle'
 import { DataTableColumnHeader } from '@/components/datatable/columnHeader'
-import { cn } from '@/lib/utils'
+import { DataTableFacetedFilter } from '@/components/datatable/facetedFilters'
+
+import { getTransactionHistoryResponseType } from '@/app/api/transactions-history/route'
 
 
 
@@ -42,6 +49,9 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Category" />
     ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
     cell: ({ row }) =>
       <div className='flex gap-2 capitalize'>
         {row.original.categoryIcon}
@@ -75,6 +85,9 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Type" />
     ),
+    filterFn: (row, id, value) => {
+      return value.includes(row.getValue(id))
+    },
     cell: ({ row }) => (
       <div
         className={cn(
@@ -105,6 +118,8 @@ const TransactionTable = ({
   to,
 }: TransactionTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
   const history = useQuery<getTransactionHistoryResponseType>({
     queryKey: ["transactions", "history", from, to],
     queryFn: async () => {
@@ -124,17 +139,53 @@ const TransactionTable = ({
     columns,
     getCoreRowModel: getCoreRowModel(),
     state: {
-      sorting
+      sorting,
+      columnFilters,
     },
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   })
 
+  const categoriesOptions = useMemo(() => {
+    const categoriesMap = new Map();
+    history.data?.forEach((transaction) => {
+      categoriesMap.set(transaction.category, {
+        value: transaction.category,
+        label: `${transaction.categoryIcon} ${transaction.category}`,
+      });
+    });
+    const uniqueCategories = new Set(categoriesMap.values());
+    return Array.from(uniqueCategories);
+  }, [history.data])
 
   return (
     <div className='w-full'>
       <div className="flex flex-warp items-end justify-between gap-2 py-4">
-        TODO:Filters
+        <div className='flex gap-2'>
+          {table.getColumn("category") && (
+            <DataTableFacetedFilter
+              title="Category"
+              column={table.getColumn("category")}
+              options={categoriesOptions}
+            />
+          )}
+          {table.getColumn("type") && (
+            <DataTableFacetedFilter
+              title="Type"
+              column={table.getColumn("type")}
+              options={[
+                { label: "Income", value: "income" },
+                { label: "Expense", value: "expense" },
+              ]}
+            />
+          )}
+        </div>
+        <div className='flex flex-wrap gap-2'>
+          <DataTableViewOptions table={table} />
+        </div>
       </div>
       <SkeletonWrapper isLoading={history.isFetching}>
         <div className="rounded-md border">
@@ -180,6 +231,24 @@ const TransactionTable = ({
               )}
             </TableBody>
           </Table>
+        </div>
+        <div className="flex items-center justify-end space-x-2 py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
         </div>
       </SkeletonWrapper>
     </div>
