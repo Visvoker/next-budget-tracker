@@ -4,6 +4,7 @@ import React, { useMemo, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { DateToUTCDate } from '@/lib/helper'
 import { useQuery } from '@tanstack/react-query'
+import { DownloadIcon, MoreHorizontal, TrashIcon } from 'lucide-react'
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -24,6 +25,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import SkeletonWrapper from '@/components/SkeletonWrapper'
 
@@ -32,6 +41,9 @@ import { DataTableColumnHeader } from '@/components/datatable/columnHeader'
 import { DataTableFacetedFilter } from '@/components/datatable/facetedFilters'
 
 import { getTransactionHistoryResponseType } from '@/app/api/transactions-history/route'
+
+import { download, generateCsv, mkConfig } from "export-to-csv";
+import DeleteTransactionDialog from './deleteTransactionDialog'
 
 
 
@@ -43,7 +55,8 @@ interface TransactionTableProps {
 const emptyData: any[] = [];
 
 type TransactionHistoryRow = getTransactionHistoryResponseType[0];
-export const columns: ColumnDef<TransactionHistoryRow>[] = [
+
+const columns: ColumnDef<TransactionHistoryRow>[] = [
   {
     accessorKey: "category",
     header: ({ column }) => (
@@ -111,7 +124,20 @@ export const columns: ColumnDef<TransactionHistoryRow>[] = [
       </p>
     ),
   },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => (
+      <RowActions transaction={row.original} />
+    )
+  }
 ];
+
+const csvConfig = mkConfig({
+  fieldSeparator: ",",
+  decimalSeparator: ".",
+  useKeysAsHeaders: true,
+})
 
 const TransactionTable = ({
   from,
@@ -133,6 +159,11 @@ const TransactionTable = ({
       return res.json()
     }
   });
+
+  const handleExportCSV = (data: any[]) => {
+    const csv = generateCsv(csvConfig)(data);
+    download(csvConfig)(csv);
+  }
 
   const table = useReactTable({
     data: history.data || emptyData,
@@ -184,6 +215,27 @@ const TransactionTable = ({
           )}
         </div>
         <div className='flex flex-wrap gap-2'>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className='ml-auto h-8 lg:flex'
+            onClick={() => {
+              const data = table.getFilteredRowModel().rows.map(row =>
+              ({
+                category: row.original.category,
+                categoryIcon: row.original.categoryIcon,
+                description: row.original.description,
+                type: row.original.type,
+                amount: row.original.amount,
+                formattedAmount: row.original.formattedAmount,
+                date: row.original.date,
+              }));
+              handleExportCSV(data);
+            }}
+          >
+            <DownloadIcon className='mr-2 h-4 w-4' />
+            Export CSV
+          </Button>
           <DataTableViewOptions table={table} />
         </div>
       </div>
@@ -256,3 +308,42 @@ const TransactionTable = ({
 }
 
 export default TransactionTable
+
+interface RowActionsProps {
+  transaction: TransactionHistoryRow;
+}
+
+const RowActions = ({ transaction }: RowActionsProps) => {
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  return (
+    <>
+      <DeleteTransactionDialog
+        open={showDeleteDialog}
+        setOpen={setShowDeleteDialog}
+        transactionId={transaction.id}
+      />
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant={"ghost"} className='h-8 w-8 p-0'>
+            <span className='sr-only'>Open menu</span>
+            <MoreHorizontal className='h-4 w-4' />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            className='flex items-center gpa-2'
+            onSelect={() => {
+              setShowDeleteDialog((prev) => !prev)
+            }}
+          >
+            <TrashIcon className='h-4 w-4 text-muted-foreground' />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+}
