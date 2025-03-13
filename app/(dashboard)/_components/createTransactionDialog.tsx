@@ -92,7 +92,6 @@ const CreateTransactionDialog = ({
       id: "create-transaction"
     });
 
-    console.log(values)
     mutate({
       ...values,
       date: DateToUTCDate(values.date),
@@ -124,7 +123,7 @@ const CreateTransactionDialog = ({
                 <FormItem >
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} />
+                    <Input {...field} value={field.value ?? ""} />
                   </FormControl>
                   <FormDescription>
                     Transaction description (optional)
@@ -139,7 +138,7 @@ const CreateTransactionDialog = ({
                 <FormItem>
                   <FormLabel>Amount</FormLabel>
                   <FormControl>
-                    <Input defaultValue={""} {...field} type='number' />
+                    <Input {...field} value={field.value ?? ""} type='number' />
                   </FormControl>
                   <FormDescription>
                     Transaction amount (require)
@@ -152,7 +151,7 @@ const CreateTransactionDialog = ({
               <FormField
                 control={form.control}
                 name="category"
-                render={({ field }) => (
+                render={({ }) => (
                   <FormItem className='flex flex-col'>
                     <FormLabel className='mr-2'>Category</FormLabel>
                     <FormControl >

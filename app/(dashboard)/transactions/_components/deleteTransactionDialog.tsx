@@ -12,8 +12,9 @@ import {
   AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
+
+import { DeleteTransaction } from '../_action/deleteTransaction';
 
 interface DeleteTransactionDialogProps {
   open: boolean;
@@ -52,7 +53,7 @@ const DeleteTransactionDialog = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your category
+            This action cannot be undone. This will permanently delete your transaction
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
