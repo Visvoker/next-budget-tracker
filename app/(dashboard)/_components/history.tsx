@@ -192,6 +192,7 @@ const CustomTooltip = ({
   active,
   payload,
   formatter,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 }: any) => {
   if (!active || !payload || payload.length === 0) return null;
 

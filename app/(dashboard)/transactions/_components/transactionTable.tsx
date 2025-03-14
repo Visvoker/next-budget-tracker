@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
 import React, { useMemo, useState } from 'react'
@@ -53,6 +52,7 @@ interface TransactionTableProps {
   to: Date,
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const emptyData: any[] = [];
 
 type TransactionHistoryRow = getTransactionHistoryResponseType[0];
@@ -160,7 +160,7 @@ const TransactionTable = ({
       return res.json()
     }
   });
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any 
   const handleExportCSV = (data: any[]) => {
     const csv = generateCsv(csvConfig)(data);
     download(csvConfig)(csv);
