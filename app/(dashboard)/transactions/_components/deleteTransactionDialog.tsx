@@ -18,7 +18,7 @@ import { DeleteTransaction } from '../_action/deleteTransaction';
 
 interface DeleteTransactionDialogProps {
   open: boolean;
-  setOpen: () => void;
+  setOpen: (open: boolean) => void;
   transactionId: string;
 }
 
