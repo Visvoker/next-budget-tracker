@@ -73,7 +73,7 @@
     "@eslint/eslintrc": "^3",
     "@tanstack/react-query-devtools": "^5.66.9",
     "@types/node": "^20",
-    "@types/react": "^19",
+    "@types/react": "^18.3.1",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.7",
