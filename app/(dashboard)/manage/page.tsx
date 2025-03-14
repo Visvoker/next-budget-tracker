@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { TransactionType } from '@/lib/type';
 
 import CreateCategoryDialog from '../_components/createCategoryDialog';
-import DeleteCategoryDialog from '../_components/DeleteCategoryDialog';
+import DeleteCategoryDialog from '../_components/deleteCategoryDialog';
 
 const ManagePage = () => {
   return (
